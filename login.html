@@ -5,6 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>POSHcs | Company Login</title>
+
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{
@@ -42,13 +43,22 @@ button{
   font-size:15px;font-weight:600;cursor:pointer;
 }
 button:hover{background:#24538d}
+button:disabled{opacity:.6;cursor:not-allowed}
+#message{
+  display:none;margin-top:16px;padding:12px;
+  border-radius:8px;font-size:13px;line-height:1.5;
+}
+#message.error{display:block;background:#fff0f0;color:#b42318}
+#message.success{display:block;background:#ecfdf3;color:#067647}
 .help{text-align:center;margin-top:22px;font-size:12px;color:#718096}
 .help a{color:#24538d;text-decoration:none}
 .footer{text-align:center;margin-top:30px;font-size:11px;color:#9aa6b5}
 </style>
 </head>
+
 <body>
 <div class="login-card">
+
   <div class="logo">
     <h1>POSHcs</h1>
     <p>Powered by AGKENTECH</p>
@@ -59,12 +69,28 @@ button:hover{background:#24538d}
 
   <form id="loginForm">
     <label for="email">Registered Company Email</label>
-    <input id="email" type="email" placeholder="Enter registered email" required>
+    <input
+      id="email"
+      type="email"
+      placeholder="Enter registered email"
+      autocomplete="username"
+      required
+    >
 
     <label for="accessKey">Unique POSHcs Access Key</label>
-    <input id="accessKey" type="password" placeholder="Enter your access key" required>
+    <input
+      id="accessKey"
+      type="password"
+      placeholder="Enter your access key"
+      autocomplete="current-password"
+      required
+    >
 
-    <button type="submit">Login to Dashboard</button>
+    <button id="loginButton" type="submit">
+      Login to Dashboard
+    </button>
+
+    <div id="message" role="alert"></div>
   </form>
 
   <div class="help">
@@ -75,6 +101,106 @@ button:hover{background:#24538d}
   <div class="footer">
     © 2026 AGKENTECH. All rights reserved.
   </div>
+
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+const POSHCS_SUPABASE_URL = "https://jqtxksqlhggsedkokakr.supabase.co";
+const POSHCS_SUPABASE_KEY = "sb_publishable_PsXPIE4lvPoQOlTsHfxePg_zyMR28-k";
+
+const supabaseClient = window.supabase.createClient(
+  POSHCS_SUPABASE_URL,
+  POSHCS_SUPABASE_KEY
+);
+
+const loginForm = document.getElementById("loginForm");
+const loginButton = document.getElementById("loginButton");
+const messageBox = document.getElementById("message");
+
+function showMessage(message, type) {
+  messageBox.textContent = message;
+  messageBox.className = type;
+}
+
+loginForm.addEventListener("submit", async function(event) {
+  event.preventDefault();
+
+  const email = document.getElementById("email").value.trim();
+  const accessKey = document.getElementById("accessKey").value.trim();
+
+  if (!email || !accessKey) {
+    showMessage("Please enter your company email and access key.", "error");
+    return;
+  }
+
+  loginButton.disabled = true;
+  loginButton.textContent = "Verifying...";
+  messageBox.className = "";
+  messageBox.textContent = "";
+
+  try {
+    // Step 1: Authenticate company credentials
+    const { data: authData, error: authError } =
+      await supabaseClient.auth.signInWithPassword({
+        email: email,
+        password: accessKey
+      });
+
+    if (authError || !authData.user) {
+      throw new Error("Invalid company email or access key.");
+    }
+
+    // Step 2: Verify active company membership
+    const { data: membership, error: memberError } =
+      await supabaseClient
+        .from("company_members")
+        .select("company_id, role, is_active")
+        .eq("user_id", authData.user.id)
+        .eq("is_active", true)
+        .maybeSingle();
+
+    if (memberError || !membership) {
+      await supabaseClient.auth.signOut();
+      throw new Error("Company membership is inactive or unavailable. Contact AGKENTECH.");
+    }
+
+    // Step 3: Verify company subscription
+    const { data: company, error: companyError } =
+      await supabaseClient
+        .from("companies")
+        .select("id, subscription_status")
+        .eq("id", membership.company_id)
+        .maybeSingle();
+
+    if (
+      companyError ||
+      !company ||
+      company.subscription_status !== "active"
+    ) {
+      await supabaseClient.auth.signOut();
+      throw new Error("Your company subscription is not active. Contact AGKENTECH.");
+    }
+
+    // Step 4: Successful login
+    showMessage("Login successful. Opening your dashboard...", "success");
+
+    window.location.replace("index_dashboard.html");
+
+  } catch (error) {
+    console.error("POSHcs login error:", error);
+
+    showMessage(
+      error.message || "Unable to login. Please try again.",
+      "error"
+    );
+
+    loginButton.disabled = false;
+    loginButton.textContent = "Login to Dashboard";
+  }
+});
+</script>
+
 </body>
 </html>
