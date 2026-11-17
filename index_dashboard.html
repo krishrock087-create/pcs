@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>POSHcs | Committee Dashboard</title>
+<style>
+:root{--navy:#17324d;--blue:#2868a8;--blue-soft:#eaf2fb;--ink:#1d2939;--muted:#667085;--line:#e6eaf0;--bg:#f5f7fa;--white:#fff;--green:#16845b;--amber:#a96508;--red:#b54747}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+.app{min-height:100vh;display:flex}.sidebar{width:240px;background:var(--navy);color:#fff;padding:24px 16px;display:flex;flex-direction:column;flex-shrink:0}
+.brand{font-size:23px;font-weight:800;letter-spacing:-.5px;padding:0 12px}.brand span{color:#8ec5ff}.subbrand{font-size:11px;color:#b7c7d8;padding:4px 12px 28px}
+.nav-label{font-size:10px;text-transform:uppercase;letter-spacing:1.2px;color:#9fb2c5;padding:0 12px 10px}
+.nav button{width:100%;border:0;background:transparent;color:#d8e2ec;text-align:left;padding:12px;border-radius:9px;font-size:14px;margin:2px 0;cursor:pointer;display:flex;gap:12px;align-items:center}
+.nav button:hover,.nav button.active{background:#294762;color:#fff}.nav .ico{width:18px;text-align:center;font-size:16px}
+.sidebar-foot{margin-top:auto;border-top:1px solid #36516a;padding:16px 12px 0;color:#c5d2df;font-size:12px;line-height:1.6}
+.main{flex:1;min-width:0}.topbar{height:72px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 34px}
+.top-title{font-size:14px;color:var(--muted)}.profile{display:flex;align-items:center;gap:10px;font-size:13px}.avatar{width:34px;height:34px;border-radius:50%;background:#e6eff8;color:var(--navy);display:grid;place-items:center;font-weight:700}
+.content{padding:30px 34px;max-width:1440px;margin:auto}.heading-row{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:24px}h1{font-size:25px;margin:0 0 6px;letter-spacing:-.5px} .muted{color:var(--muted);font-size:13px}
+.btn{border:1px solid var(--line);background:#fff;color:var(--ink);padding:10px 14px;border-radius:8px;font-weight:600;font-size:13px;cursor:pointer}.btn.primary{background:var(--blue);color:#fff;border-color:var(--blue)}.btn:hover{filter:brightness(.97)}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-bottom:22px}.stat{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px}.stat-top{display:flex;justify-content:space-between;color:var(--muted);font-size:12px}.stat-num{font-size:29px;font-weight:750;margin:12px 0 4px}.stat-note{font-size:11px;color:var(--muted)}.stat-icon{width:34px;height:34px;border-radius:9px;background:var(--blue-soft);display:grid;place-items:center;color:var(--blue);font-size:17px}
+.panel{background:#fff;border:1px solid var(--line);border-radius:12px;margin-bottom:20px;overflow:hidden}.panel-head{padding:18px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)}h2{font-size:15px;margin:0}.panel-body{padding:18px 20px}
+table{width:100%;border-collapse:collapse;text-align:left}th{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:650;padding:12px 14px;background:#fafbfc;border-bottom:1px solid var(--line)}td{font-size:13px;padding:14px;border-bottom:1px solid #eef1f4}tr:last-child td{border-bottom:0}.case-id{font-weight:700;color:var(--blue)}.status{display:inline-block;padding:5px 9px;border-radius:20px;font-size:11px;font-weight:650;background:#fff4df;color:var(--amber)}.status.new{background:#eaf2ff;color:#285c9b}.status.closed{background:#e8f6ef;color:var(--green)}
+.empty{padding:36px;text-align:center;color:var(--muted);font-size:13px}.empty strong{display:block;color:var(--ink);margin-bottom:6px}
+.page{display:none}.page.active{display:block}.two-col{display:grid;grid-template-columns:1.5fr 1fr;gap:18px}.notice{padding:14px 16px;background:#f0f6fc;border:1px solid #dbe9f7;border-radius:9px;color:#385a78;font-size:12px;line-height:1.6}
+.member{display:flex;justify-content:space-between;align-items:center;padding:13px 0;border-bottom:1px solid #eef1f4}.member:last-child{border:0}.member-name{font-size:13px;font-weight:650}.member-role{font-size:11px;color:var(--muted);margin-top:4px}
+.search{padding:9px 11px;border:1px solid var(--line);border-radius:8px;font-size:13px;min-width:210px;outline:none}.toolbar{display:flex;gap:10px;align-items:center}
+.modal-bg{display:none;position:fixed;inset:0;background:#172b3d66;align-items:center;justify-content:center;padding:20px;z-index:10}.modal-bg.show{display:flex}.modal{background:#fff;border-radius:14px;width:min(560px,100%);padding:22px;box-shadow:0 20px 60px #0002}.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}.close{border:0;background:#f1f3f5;border-radius:7px;width:30px;height:30px;cursor:pointer}.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.detail-label{font-size:11px;color:var(--muted);margin-bottom:5px}.detail-value{font-size:13px;font-weight:600}.mobile-menu{display:none}
+@media(max-width:900px){.sidebar{width:205px}.content{padding:24px 20px}.topbar{padding:0 20px}.stats{grid-template-columns:repeat(2,1fr)}.two-col{grid-template-columns:1fr}}
+@media(max-width:640px){.app{display:block}.sidebar{display:none;position:fixed;z-index:5;top:0;bottom:0;left:0;width:250px}.sidebar.open{display:flex}.topbar{height:62px;padding:0 16px}.mobile-menu{display:inline-block;margin-right:10px;border:0;background:#f0f3f6;padding:8px 10px;border-radius:7px}.content{padding:22px 14px}.heading-row{align-items:center}.heading-row .btn{white-space:nowrap}.stats{gap:10px}.stat{padding:14px}.stat-num{font-size:24px}.table-wrap{overflow-x:auto}table{min-width:650px}.profile .profile-label{display:none}.search{min-width:0;width:100%}.toolbar{width:100%}.heading-row.stack{display:block}.heading-row.stack .toolbar{margin-top:14px}.detail-grid{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar" id="sidebar">
+  <div class="brand">POSH<span>cs</span></div><div class="subbrand">COMMITTEE MANAGEMENT</div>
+  <div class="nav-label">Workspace</div>
+  <nav class="nav">
+    <button class="active" data-page="overview"><span class="ico">▦</span>Overview</button>
+    <button data-page="complaints"><span class="ico">▤</span>Complaints</button>
+    <button data-page="members"><span class="ico">♙</span>IC Members</button>
+    <button data-page="reports"><span class="ico">▥</span>Reports</button>
+  </nav>
+  <div class="sidebar-foot">POSHcs<br><span style="color:#9fb2c5">Powered by AGKENTECH</span><br><br>Demo interface · Sample data only</div>
+</aside>
+<main class="main">
+  <header class="topbar">
+    <div><button class="mobile-menu" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button><span class="top-title">Committee Workspace</span></div>
+    <div class="profile"><div class="avatar">IC</div><span class="profile-label">Internal Committee</span></div>
+  </header>
+  <div class="content">
+    <section class="page active" id="page-overview">
+      <div class="heading-row"><div><h1>Overview</h1><div class="muted">A quick view of your complaint management activity.</div></div><button class="btn" onclick="showPage('complaints')">View complaints →</button></div>
+      <div class="stats">
+        <div class="stat"><div class="stat-top"><span>Total complaints</span><span class="stat-icon">▤</span></div><div class="stat-num" id="statTotal">—</div><div class="stat-note">All recorded cases</div></div>
+        <div class="stat"><div class="stat-top"><span>New complaints</span><span class="stat-icon">✦</span></div><div class="stat-num" id="statNew">—</div><div class="stat-note">Awaiting initial review</div></div>
+        <div class="stat"><div class="stat-top"><span>Under review</span><span class="stat-icon">◷</span></div><div class="stat-num" id="statReview">—</div><div class="stat-note">Currently in progress</div></div>
+        <div class="stat"><div class="stat-top"><span>Closed</span><span class="stat-icon">✓</span></div><div class="stat-num" id="statClosed">—</div><div class="stat-note">Cases marked as closed</div></div>
+      </div>
+      <div class="two-col">
+        <div class="panel"><div class="panel-head"><h2>Recent complaints</h2><button class="btn" onclick="showPage('complaints')">View all</button></div>
+          <div class="table-wrap"><table><thead><tr><th>Case ID</th><th>Received</th><th>Status</th></tr></thead><tbody><tr><td colspan="3" class="empty">Waiting for secure connection…</td></tr></tbody></table></div></div>
+        <div class="panel"><div class="panel-head"><h2>Committee snapshot</h2></div><div class="panel-body" id="liveICMembers"><div class="empty">Waiting for secure connection…</div></div><div class="member-role">Committee lead</div></div><span class="status closed">Active</span></div>
+          <div class="member"><div><div class="member-name">Employee Member</div><div class="member-role">Internal member</div></div><span class="status closed">Active</span></div>
+          <div class="member"><div><div class="member-name">External Member</div><div class="member-role">External member</div></div><span class="status closed">Active</span></div>
+          <div class="muted" style="margin-top:12px">3 sample committee members</div>
+        </div></div>
+      </div>
+      <div class="notice">Confidentiality reminder: complaint information should be accessible only to authorized Internal Committee members. This is a UI prototype with sample data and is not connected to secure storage or authentication.</div>
+    </section>
+
+    <section class="page" id="page-complaints">
+      <div class="heading-row stack"><div><h1>Complaints</h1><div class="muted">Review and track complaint records.</div></div><div class="toolbar"><input class="search" id="caseSearch" placeholder="Search by case ID..." oninput="filterCases()"></div></div>
+      <div class="panel"><div class="panel-head"><h2>Complaint register</h2><span class="muted">8 sample records</span></div><div class="table-wrap"><table id="caseTable"><thead><tr><th>Case ID</th><th>Date received</th><th>Category</th><th>Assigned to</th><th>Status</th><th></th></tr></thead><tbody id="liveCaseRows"><tr><td colspan="6" class="empty">Waiting for secure connection…</td></tr></tbody></table></div></div>
+      <div class="notice">Only case reference and limited workflow information are shown in this prototype. Do not enter or upload real complaint details.</div>
+    </section>
+
+    <section class="page" id="page-members">
+      <div class="heading-row"><div><h1>IC Members</h1><div class="muted">Internal Committee member directory.</div></div></div>
+      <div class="panel"><div class="panel-head"><h2>Committee members</h2><span class="muted">Sample information</span></div><div class="panel-body">
+        <div class="member"><div><div class="member-name">Committee Member A</div><div class="member-role">Presiding Officer</div></div><span class="status closed">Active</span></div>
+        <div class="member"><div><div class="member-name">Committee Member B</div><div class="member-role">Employee Member</div></div><span class="status closed">Active</span></div>
+        <div class="member"><div><div class="member-name">Committee Member C</div><div class="member-role">Employee Member</div></div><span class="status closed">Active</span></div>
+        <div class="member"><div><div class="member-name">External Member</div><div class="member-role">External Member</div></div><span class="status closed">Active</span></div>
+      </div></div>
+    </section>
+
+    <section class="page" id="page-reports">
+      <div class="heading-row"><div><h1>Reports</h1><div class="muted">Basic complaint status summary.</div></div></div>
+      <div class="stats">
+        <div class="stat"><div class="stat-top"><span>Total received</span><span class="stat-icon">▤</span></div><div class="stat-num">08</div><div class="stat-note">Sample reporting period</div></div>
+        <div class="stat"><div class="stat-top"><span>Pending</span><span class="stat-icon">◷</span></div><div class="stat-num">06</div><div class="stat-note">New + under review</div></div>
+        <div class="stat"><div class="stat-top"><span>Disposed</span><span class="stat-icon">✓</span></div><div class="stat-num">02</div><div class="stat-note">Marked closed</div></div>
+        <div class="stat"><div class="stat-top"><span>Committee members</span><span class="stat-icon">♙</span></div><div class="stat-num">04</div><div class="stat-note">Sample directory count</div></div>
+      </div>
+      <div class="panel"><div class="panel-head"><h2>Reporting note</h2></div><div class="panel-body muted" style="line-height:1.7">This screen currently displays illustrative figures only. Official statutory reporting formats, period definitions and required fields should be confirmed with legal counsel before implementation.</div></div>
+    </section>
+  </div>
+</main>
+</div>
+<div class="modal-bg" id="caseModal" onclick="if(event.target===this)closeCase()"><div class="modal">
+  <div class="modal-head"><h2>Complaint summary</h2><button class="close" onclick="closeCase()">✕</button></div>
+  <div class="detail-grid">
+    <div><div class="detail-label">Case reference</div><div class="detail-value" id="d-id"></div></div>
+    <div><div class="detail-label">Date received</div><div class="detail-value" id="d-date"></div></div>
+    <div><div class="detail-label">Category</div><div class="detail-value" id="d-category"></div></div>
+    <div><div class="detail-label">Assigned to</div><div class="detail-value" id="d-assignee"></div></div>
+    <div><div class="detail-label">Current status</div><div class="detail-value" id="d-status"></div></div>
+  </div>
+  <p class="muted" style="margin:20px 0 0;line-height:1.6">Sample summary only. Full complaint narratives and evidence are intentionally not included in this prototype.</p>
+</div></div>
+<script>
+function showPage(name){
+ document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+ document.getElementById('page-'+name).classList.add('active');
+ document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===name));
+ document.getElementById('sidebar').classList.remove('open');
+ const titles={overview:'Overview',complaints:'Complaints',members:'IC Members',reports:'Reports'};
+ document.querySelector('.top-title').textContent=titles[name]+' · Committee Workspace';
+}
+document.querySelectorAll('.nav button').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.page)));
+function openCase(id,date,category,assignee,status){
+ document.getElementById('d-id').textContent=id;document.getElementById('d-date').textContent=date;
+ document.getElementById('d-category').textContent=category;document.getElementById('d-assignee').textContent=assignee;
+ document.getElementById('d-status').textContent=status;document.getElementById('caseModal').classList.add('show');
+}
+function closeCase(){document.getElementById('caseModal').classList.remove('show')}
+function filterCases(){
+ const q=document.getElementById('caseSearch').value.toLowerCase();
+ document.querySelectorAll('#caseTable tbody tr').forEach(r=>r.style.display=r.innerText.toLowerCase().includes(q)?'':'none');
+}
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const POSHCS_SUPABASE_URL = "jqtxksqlhggsedkokakr";
+const POSHCS_SUPABASE_KEY = "https://jqtxksqlhggsedkokakr.supabase.co";
+let poshcsClient = null;
+let activeCompanyId = null;
+
+function notice(message, error=false) {
+  let el = document.getElementById("connectionNotice");
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "connectionNotice";
+    el.style.cssText = "margin:0 0 18px;padding:12px 15px;border-radius:9px;font-size:12px;line-height:1.5;border:1px solid #dbe9f7;background:#f0f6fc;color:#385a78";
+    document.querySelector(".content").prepend(el);
+  }
+  el.textContent = message;
+  el.style.background = error ? "#fff1f0" : "#f0f6fc";
+  el.style.borderColor = error ? "#f3c7c3" : "#dbe9f7";
+  el.style.color = error ? "#9f3028" : "#385a78";
+}
+function esc(v) {
+  return String(v ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+function statusName(s) {
+  return ({new:"New",acknowledged:"Acknowledged",under_review:"Under review",inquiry:"Inquiry",recommendation:"Recommendation",closed:"Closed"})[s] || s;
+}
+async function initPOSHcs() {
+  if (!window.supabase || POSHCS_SUPABASE_URL.includes("YOUR_") || POSHCS_SUPABASE_KEY.includes("YOUR_")) {
+    notice("Add your Supabase Project URL and publishable/anon key in this file. No data has been loaded.");
+    return;
+  }
+  poshcsClient = window.supabase.createClient(POSHCS_SUPABASE_URL, POSHCS_SUPABASE_KEY);
+  const {data:{session}, error} = await poshcsClient.auth.getSession();
+  if (error) { notice("Session check failed: " + error.message, true); return; }
+  if (!session) {
+    notice("Supabase connection configured. No signed-in session is active yet. Login UI will be added in the later phase; private company data remains protected.");
+    return;
+  }
+  await loadCompanyData(session.user.id);
+}
+async function loadCompanyData(userId) {
+  notice("Checking company access…");
+  const {data: membership, error: me} = await poshcsClient.from("company_members")
+    .select("company_id,role").eq("user_id",userId).eq("is_active",true).limit(1).maybeSingle();
+  if (me || !membership) { notice(me ? me.message : "No active company membership for this account.", true); return; }
+  activeCompanyId = membership.company_id;
+
+  const {data: company, error: ce} = await poshcsClient.from("companies")
+    .select("company_name").eq("id",activeCompanyId).single();
+  if (ce) { notice("Company lookup failed: " + ce.message, true); return; }
+  document.querySelector(".top-title").textContent = company.company_name + " · Committee Workspace";
+
+  const {data: cases, error: caseErr} = await poshcsClient.from("complaints")
+    .select("id,case_reference,received_on,category,status,assigned_ic_member_id")
+    .eq("company_id",activeCompanyId).order("received_on",{ascending:false});
+  if (caseErr) { notice("Complaint list failed: " + caseErr.message, true); return; }
+  const records = cases || [];
+  document.getElementById("statTotal").textContent = records.length;
+  document.getElementById("statNew").textContent = records.filter(x=>x.status==="new").length;
+  document.getElementById("statReview").textContent = records.filter(x=>["acknowledged","under_review","inquiry","recommendation"].includes(x.status)).length;
+  document.getElementById("statClosed").textContent = records.filter(x=>x.status==="closed").length;
+
+  const recent = document.getElementById("liveRecentCases");
+  if (recent) recent.innerHTML = records.slice(0,3).map(r=>`<tr><td class="case-id">${esc(r.case_reference)}</td><td>${esc(r.received_on)}</td><td><span class="status ${r.status==="new"?"new":r.status==="closed"?"closed":""}">${esc(statusName(r.status))}</span></td></tr>`).join("") || '<tr><td colspan="3" class="empty">No complaints recorded.</td></tr>';
+
+  const allRows = document.getElementById("liveCaseRows");
+  if (allRows) allRows.innerHTML = records.map(r=>`<tr><td class="case-id">${esc(r.case_reference)}</td><td>${esc(r.received_on)}</td><td>${esc(r.category)}</td><td>${r.assigned_ic_member_id ? "Assigned" : "Not assigned"}</td><td><span class="status ${r.status==="new"?"new":r.status==="closed"?"closed":""}">${esc(statusName(r.status))}</span></td><td><span class="muted">Protected</span></td></tr>`).join("") || '<tr><td colspan="6" class="empty">No complaints recorded.</td></tr>';
+
+  await loadICDirectory();
+  notice("Connected. Displaying this company's records allowed by Supabase Row Level Security.");
+}
+async function loadICDirectory() {
+  const box = document.getElementById("liveICMembers");
+  if (!box || !activeCompanyId) return;
+  const {data, error} = await poshcsClient.from("ic_members")
+    .select("id,full_name,role_title,official_email,is_active")
+    .eq("company_id",activeCompanyId).order("created_at",{ascending:true});
+  if (error) { box.textContent = "Could not load IC members: " + error.message; return; }
+  const roleNames = {presiding_officer:"Presiding Officer",employee_member:"Employee Member",external_member:"External Member"};
+  box.innerHTML = (data || []).map(m=>`<div class="member"><div><div class="member-name">${esc(m.full_name)}</div><div class="member-role">${esc(roleNames[m.role_title] || m.role_title)}${m.official_email ? " · "+esc(m.official_email) : ""}</div></div><span class="status ${m.is_active?"closed":""}">${m.is_active?"Active":"Inactive"}</span></div>`).join("") || '<div class="empty">No IC members added yet.</div>';
+}
+document.addEventListener("DOMContentLoaded",initPOSHcs);
+</script>
+
+</body>
+</html>
